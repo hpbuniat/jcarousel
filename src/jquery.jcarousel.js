@@ -10,6 +10,12 @@
  */
 (function($, window) {
 
+    var toFloat = function(val) {
+        return parseFloat(val) || 0;
+    };
+
+    var arraySlice = Array.prototype.slice;
+
     var jCarousel = {};
 
     jCarousel.version = '@VERSION';
@@ -21,10 +27,10 @@
     jCarousel.noop = function() {};
 
     jCarousel.proxy = function(fn, context) {
-        var args = Array.prototype.slice.call(arguments, 2);
+        var args = arraySlice.call(arguments, 2);
 
         return function() {
-            return fn.apply(context, args.concat(Array.prototype.slice.call(arguments)));
+            return fn.apply(context, args.concat(arraySlice.call(arguments)));
         };
     };
 
@@ -43,31 +49,31 @@
     };
 
     jCarousel.innerWidth = function(element) {
-        return (parseFloat(element.css('width')) || 0) +
-               (parseFloat(element.css('padding-left')) || 0) +
-               (parseFloat(element.css('padding-right')) || 0);
+        return toFloat(element.css('width')) +
+               toFloat(element.css('padding-left')) +
+               toFloat(element.css('padding-right'));
     };
 
     jCarousel.innerHeight = function(element) {
-        return (parseFloat(element.css('height')) || 0) +
-               (parseFloat(element.css('padding-top')) || 0) +
-               (parseFloat(element.css('padding-bottom')) || 0);
+        return toFloat(element.css('height')) +
+               toFloat(element.css('padding-top')) +
+               toFloat(element.css('padding-bottom'));
     };
 
     jCarousel.outerWidth = function(element) {
         return jCarousel.innerWidth(element) +
-               (parseFloat(element.css('margin-left')) || 0) +
-               (parseFloat(element.css('margin-right')) || 0) +
-               (parseFloat(element.css('border-left-width')) || 0) +
-               (parseFloat(element.css('border-right-width')) || 0);
+               toFloat(element.css('margin-left')) +
+               toFloat(element.css('margin-right')) +
+               toFloat(element.css('border-left-width')) +
+               toFloat(element.css('border-right-width'));
     };
 
     jCarousel.outerHeight = function(element) {
         return jCarousel.innerHeight(element) +
-               (parseFloat(element.css('margin-top')) || 0) +
-               (parseFloat(element.css('margin-bottom')) || 0) +
-               (parseFloat(element.css('border-top-width')) || 0) +
-               (parseFloat(element.css('border-bottom-width')) || 0);
+               toFloat(element.css('margin-top')) +
+               toFloat(element.css('margin-bottom')) +
+               toFloat(element.css('border-top-width')) +
+               toFloat(element.css('border-bottom-width'));
     };
 
     var rroot = /^(?:body|html)$/i;
@@ -75,22 +81,22 @@
     jCarousel.position = function(element) {
         var offsetParent = element.get(0).offsetParent || window.document.body;
 
-        while (offsetParent && (!rroot.test(offsetParent.nodeName) && $(offsetParent).css("position") === "static") ) {
-                offsetParent = offsetParent.offsetParent;
+        while (offsetParent && (!rroot.test(offsetParent.nodeName) && $(offsetParent).css('position') === 'static') ) {
+            offsetParent = offsetParent.offsetParent;
         }
 
         offsetParent = $(offsetParent);
 
-        var offset       = element.offset(),
+        var offset = element.offset(),
             parentOffset = rroot.test(offsetParent[0].nodeName) ?
-                               { top: 0, left: 0 } :
+                               {top: 0, left: 0} :
                                offsetParent.offset();
 
-        offset.top  -= parseFloat(element.css("margin-top")) || 0;
-        offset.left -= parseFloat(element.css("margin-left")) || 0;
+        offset.top  -= toFloat(element.css('margin-top'));
+        offset.left -= toFloat(element.css('margin-left'));
 
-        parentOffset.top  += parseFloat(offsetParent.css("border-top-width")) || 0;
-        parentOffset.left += parseFloat(offsetParent.css("border-left-width")) || 0;
+        parentOffset.top  += toFloat(offsetParent.css('border-top-width'));
+        parentOffset.left += toFloat(offsetParent.css('border-left-width'));
 
         return {
             top: offset.top - parentOffset.top,
@@ -103,8 +109,8 @@
     jCarousel.parseTarget = function(target) {
         var relative = false,
             parts = typeof target !== 'object' ?
-                           relativeTarget.exec(target) :
-                           null;
+                        relativeTarget.exec(target) :
+                        null;
 
         if (parts) {
             target = parseInt(parts[2], 10) || 0;
@@ -193,8 +199,8 @@
             if (typeof key === 'string') {
                 if (typeof value === 'undefined') {
                     return typeof this.options[key] === 'undefined' ?
-                        null :
-                        this.options[key];
+                               null :
+                               this.options[key];
                 }
 
                 this.options[key] = value;
@@ -211,8 +217,8 @@
         carousel: function() {
             if (!!this.options.carousel) {
                 return this.options.carousel.jquery ?
-                    this.options.carousel.data('jcarousel') :
-                    this.options.carousel;
+                           this.options.carousel.data('jcarousel') :
+                           this.options.carousel;
             }
 
             if (!this._carousel) {
@@ -253,9 +259,7 @@
         if (name !== 'jcarousel') {
             pluginName  = 'jcarousel' + name.toLowerCase();
             pluginClass = 'jcarousel-' + name.toLowerCase();
-            pluginFn    = 'jcarousel' +
-                               name.charAt(0).toUpperCase() +
-                               name.slice(1);
+            pluginFn    = 'jcarousel' + name.charAt(0).toUpperCase() + name.slice(1);
         } else {
             pluginName = pluginClass = pluginFn = name;
         }
@@ -286,7 +290,7 @@
         }, callback.call(jCarousel, $));
 
         $.fn[pluginFn] = function(options) {
-            var args = Array.prototype.slice.call(arguments, 1),
+            var args = arraySlice.call(arguments, 1),
                 returnValue = this;
 
             if (typeof options === 'string') {
@@ -454,7 +458,7 @@
             items: function() {
                 if (this._items === null) {
                     var option = this.option('items');
-                    this._items = ($.isFunction(option) ? option.call(this) : this.list().find(option));
+                    this._items = ($.isFunction(option) ? option.call(this) : this.list().find(option)).not('.jcarousel-clone');
                 }
 
                 return this._items;
@@ -577,7 +581,7 @@
                                         // Force items reload
                                         this._items = null;
 
-                                        var lt  = parseFloat(this.list().css(this.lt)) || 0,
+                                        var lt  = toFloat(this.list().css(this.lt)),
                                             dim = this._dimension(curr);
 
                                         this.rtl ? lt += dim : lt -= dim;
@@ -601,19 +605,30 @@
                 return this;
             },
             _reload: function() {
-                var element = this.element();
+                var element = this.element(),
+                    checkRTL = function() {
+                        if (('' + element.attr('dir')).toLowerCase() === 'rtl') {
+                            return true;
+                        }
+
+                        var found = false;
+
+                        element.parents('[dir]').each(function() {
+                            if ((/rtl/i).test($(this).attr('dir'))) {
+                                found = true;
+                                return false;
+                            }
+                        });
+
+                        return found;
+                    };
 
                 this.vertical = this.options.vertical == null ?
-                    ('' + element.attr('class')).toLowerCase().indexOf('jcarousel-vertical') > -1 :
-                    this.options.vertical;
-
-                this.rtl = this.options.rtl == null ?
-                    ('' + element.attr('dir')).toLowerCase() === 'rtl' ||
-                    element.parents('[dir]').filter(function() {
-                        return (/rtl/i).test($(this).attr('dir'));
-                    }).size() > 0 :
-                    this.options.rtl;
-
+                                    ('' + element.attr('class'))
+                                        .toLowerCase()
+                                        .indexOf('jcarousel-vertical') > -1 :
+                                    this.options.vertical;
+                this.rtl = this.options.rtl == null ? checkRTL() : this.options.rtl;
                 this.lt = this.vertical ? 'top' : 'left';
 
                 // Force items reload
@@ -663,7 +678,7 @@
 
                 this._prepare(item);
                 var pos = this._position(item),
-                    currPos = parseFloat(this.list().css(this.lt)) || 0;
+                    currPos = toFloat(this.list().css(this.lt));
 
                 if (pos === currPos) {
                     if ($.isFunction(callback)) {
@@ -781,7 +796,7 @@
                         update.visible = update.visible.add(curr);
 
                         // Remove right/bottom margin from total width
-                        margin = parseFloat(curr.css('margin-' + lrb)) || 0;
+                        margin = toFloat(curr.css('margin-' + lrb));
 
                         if ((wh - margin) <= clip) {
                             update.fullyvisible = update.fullyvisible.add(curr);
@@ -813,7 +828,7 @@
                         update.visible = update.visible.add(curr);
 
                         // Remove right/bottom margin from total width
-                        margin = parseFloat(curr.css('margin-' + lrb)) || 0;
+                        margin = toFloat(curr.css('margin-' + lrb));
 
                         if ((wh - margin) <= clip) {
                             update.fullyvisible = update.fullyvisible.add(curr);
@@ -834,7 +849,7 @@
                     update.last.index() === (this.items().size() - 1)) {
 
                     // Remove right/bottom margin from total width
-                    wh -= parseFloat(update.last.css('margin-' + lrb)) || 0;
+                    wh -= toFloat(update.last.css('margin-' + lrb));
 
                     if (wh > clip) {
                         this.tail = wh - clip;
