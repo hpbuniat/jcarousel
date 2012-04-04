@@ -106,7 +106,7 @@ $(function() {
             var carousel = this.carousel(),
                 items    = carousel.items();
 
-            for (var i = first; i <= last, i++) {
+            for (var i = first; i <= last; i++) {
                 // Replace the src of the placeholder image with the actual image src
                 items.eq(i).find('img').attr('src', data.images[i]);
             };
